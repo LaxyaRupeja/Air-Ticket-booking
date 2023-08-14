@@ -20,7 +20,7 @@ router.post("/register", async (req, res) => {
         const hash = bcrypt.hashSync(password, 3);
         const newUser = User({ name, password: hash, email });
         await newUser.save();
-        res.json(newUser);
+        res.status(201).json(newUser);
     }
     catch (err) {
         console.log("Something wend wrong", err)
@@ -38,7 +38,7 @@ router.post("/login", async (req, res) => {
         const match = bcrypt.compareSync(password, exits.password);
         if (match) {
             var token = jwt.sign({ userID: exits._id }, 'shhhhh', { expiresIn: "7d" });
-            res.json({ message: "Login Successful", token })
+            res.status(201).json({ message: "Login Successful", token })
         }
         else {
             res.status(404).json({ message: "Login failed/Wrong Password" });
@@ -58,7 +58,7 @@ router.get("/flights", auth, async (req, res) => {
     }
 
 })
-router.get("/flights/:id", auth,async (req, res) => {
+router.get("/flights/:id", auth, async (req, res) => {
     const { id } = req.params;
     try {
         const flights = await Flight.findById(id);
@@ -69,19 +69,19 @@ router.get("/flights/:id", auth,async (req, res) => {
         res.status(404).json({ Error: error });
     }
 })
-router.post("/flights", auth,async (req, res) => {
+router.post("/flights", auth, async (req, res) => {
     const { airline, flightNo, departure, arrival, departureTime, arrivalTime, seats, price } = req.body;
     try {
         const newFlight = Flight({ airline, flightNo, departure, arrival, departureTime, arrivalTime, seats, price });
         await newFlight.save();
-        res.json({ newFlight });
+        res.status(201).json({ newFlight });
     } catch (error) {
         console.log("Something went wrong", error);
         res.json({ Error: error });
     }
 
 })
-router.patch("/flights/:id", auth,async (req, res) => {
+router.patch("/flights/:id", auth, async (req, res) => {
     const { id } = req.params;
     try {
         const UpdatedFlight = await Flight.findByIdAndUpdate(id, req.body, {
@@ -91,13 +91,13 @@ router.patch("/flights/:id", auth,async (req, res) => {
             res.status(404).json({ message: "Invalid ID" })
             return;
         }
-        res.json({ message: "Updated Successfully", UpdatedFlight });
+        res.status(204).json({ message: "Updated Successfully", UpdatedFlight });
     } catch (error) {
         console.log("Something went wrong", error);
         res.json({ Error: error });
     }
 })
-router.delete("/flights/:id", auth,async (req, res) => {
+router.delete("/flights/:id", auth, async (req, res) => {
     const { id } = req.params;
     try {
         const DeletedFlight = await Flight.findByIdAndDelete(id);
@@ -105,7 +105,7 @@ router.delete("/flights/:id", auth,async (req, res) => {
             res.status(404).json({ message: "Invalid ID" })
             return;
         }
-        res.json({ message: "Deleted Successfully", DeletedFlight });
+        res.status(202).json({ message: "Deleted Successfully", DeletedFlight });
     } catch (error) {
         console.log("Something went wrong", error);
         res.json({ Error: error });
@@ -122,14 +122,14 @@ router.post("/booking", auth, async (req, res) => {
         const newBooking = Booking({ user: userID, flight: id });
         await newBooking.save();
         const UserBooking = await Booking.findById(newBooking._id).populate("user").populate("flight");
-        res.json({ message: "Flight has been booked", UserBooking });
+        res.status(201).json({ message: "Flight has been booked", UserBooking });
     } catch (error) {
         console.log("Something went wrong", error);
         res.json({ Error: error });
     }
 
 })
-router.get("/dashboard", auth,async (req, res) => {
+router.get("/dashboard", auth, async (req, res) => {
 
     try {
         const Bookings = await Booking.find().populate("user").populate("flight");
@@ -140,7 +140,7 @@ router.get("/dashboard", auth,async (req, res) => {
     }
 
 })
-router.patch("/dashboard/:id", auth,async (req, res) => {
+router.patch("/dashboard/:id", auth, async (req, res) => {
     const { id } = req.params;
     try {
         const UpdatedBooking = await Booking.findByIdAndUpdate(id, req.body);
@@ -148,13 +148,13 @@ router.patch("/dashboard/:id", auth,async (req, res) => {
             res.status(404).json({ message: "Invalid ID" })
             return;
         }
-        res.json({ message: "Updated Successfully", UpdatedBooking });
+        res.status(204).json({ message: "Updated Successfully", UpdatedBooking });
     } catch (error) {
         console.log("Something went wrong", error);
         res.json({ Error: error });
     }
 })
-router.delete("/dashboard/:id", auth,async (req, res) => {
+router.delete("/dashboard/:id", auth, async (req, res) => {
     const { id } = req.params;
     try {
         const DeletedBooking = await Booking.findByIdAndUpdate(id);
@@ -162,7 +162,7 @@ router.delete("/dashboard/:id", auth,async (req, res) => {
             res.status(404).json({ message: "Invalid ID" })
             return;
         }
-        res.json({ message: "Deleted Successfully", DeletedBooking });
+        res.status(202).json({ message: "Deleted Successfully", DeletedBooking });
     } catch (error) {
         console.log("Something went wrong", error);
         res.json({ Error: error });
